@@ -67,10 +67,31 @@ public class BoardDaoImpl implements BoardDao{
 		// TODO Auto-generated method stub
 		return sqlSession.selectList("board.menuList");
 	}
-	@Override	
-	public List<BoardVo> selectBoardListSearch(PageVo pageVo) throws Exception {
+	@Override
+	public List<BoardVo> phoneList() throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectList("board.boardListSearch",pageVo);
-	}	
+		return sqlSession.selectList("board.phoneList");
+	}
+	@Override
+	public List<BoardVo> userList() throws Exception {
+		// TODO Auto-generated method stub
+		return sqlSession.selectList("board.userList");
+	}
+	@Override
+	public int userInsert(BoardVo boardVo) throws Exception {
+		// TODO Auto-generated method stub
+		return sqlSession.insert("board.userInput",boardVo);
+	}
+	@Override
+	public int loginCheck(BoardVo boardVo) throws Exception {
+		// TODO Auto-generated method stub
+		return sqlSession.selectOne("board.loginCheck",boardVo);
+	}
+	
+	@Override
+	public String loginIdSelect(String sessionId) throws Exception {
+		// TODO Auto-generated method stub
+		return sqlSession.selectOne("board.loginIdSelect",sessionId);
+	}
 	
 }

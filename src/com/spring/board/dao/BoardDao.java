@@ -16,9 +16,25 @@ public interface BoardDao {
 	public int selectBoardCnt() throws Exception;
 
 	public int boardInsert(BoardVo boardVo) throws Exception;
+	
 	public int boardDelete(BoardVo boardVo) throws Exception;
+	
 	public int boardUpdate(BoardVo boardVo) throws Exception;
+	
 	public List<BoardVo> menuList() throws Exception;
-	public List<BoardVo> selectBoardListSearch(PageVo pageVo) throws Exception;
+	
+	public List<BoardVo> phoneList() throws Exception;
+	
+	public List<BoardVo> userList() throws Exception;
+	
+	public int userInsert(BoardVo boardVo) throws Exception; 
+	
+	public int loginCheck(BoardVo boardVo) throws Exception;
+	
+	public String loginIdSelect(String sessionId) throws Exception;
+	
+	
+	
+
 
 }

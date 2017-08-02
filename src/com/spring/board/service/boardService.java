@@ -2,6 +2,8 @@ package com.spring.board.service;
 
 import java.util.List;
 
+import org.json.simple.JSONArray;
+
 import com.spring.board.vo.BoardVo;
 import com.spring.board.vo.PageVo;
 
@@ -23,8 +25,18 @@ public interface boardService {
 	
 	public List<BoardVo> selectMenuList() throws Exception;
 	
+	public List<BoardVo> selectPhoneList() throws Exception;
 	
-	public List<BoardVo> selectBoardListSearch(PageVo pageVo) throws Exception;
+	public JSONArray selectUserList() throws Exception;
+	
+	public int userInsert(BoardVo boardVo) throws Exception;
+	
+	public int loginiCheck(BoardVo boardVo) throws Exception;
+	
+	public PageVo pageCompute(int nowPage,int totalCnt) throws Exception;
+	
+	public String loginIdSelect(String sessionId) throws Exception;
+	
 	
 	
 	

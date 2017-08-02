@@ -6,8 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import javax.servlet.http.HttpSession;
+import javax.websocket.Session;
+
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,8 @@ import com.spring.board.vo.BoardVo;
 import com.spring.board.vo.PageVo;
 import com.spring.common.CommonUtil;
 
+import net.sf.json.JSONObject;
+
 @Controller
 public class BoardController {
 	
@@ -35,27 +41,35 @@ public class BoardController {
 	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 	
 	@RequestMapping(value = "/board/boardList.do", method = RequestMethod.GET)
-	public String boardList(Locale locale, Model model,PageVo pageVo) throws Exception{
+	public String boardList(Locale locale, Model model,PageVo pageVo, HttpSession session) throws Exception{
 		
 		List<BoardVo> boardList = new ArrayList<BoardVo>();
 		List<BoardVo> menuList = new ArrayList<BoardVo>();
+		String loginName = "";
 		
 		int page = 1;
 		int totalCnt = 0;
 		
-		
 		if(pageVo.getPageNo() == 0){
-			pageVo.setPageNo(page);;
+			pageVo.setPageNo(page);
 		}
 		
+		System.out.println("loginId : "+(String)session.getAttribute("sessionId"));
 		boardList = boardService.SelectBoardList(pageVo);
 		totalCnt = boardService.selectBoardCnt();
 		menuList = boardService.selectMenuList();
+		pageVo = boardService.pageCompute(pageVo.getPageNo(), totalCnt);
+		if((String)session.getAttribute("sessionId")!=null)
+		{
+			loginName = boardService.loginIdSelect((String)session.getAttribute("sessionId"));
+		}
 		
 		model.addAttribute("boardList", boardList);
 		model.addAttribute("menuList", menuList);
 		model.addAttribute("totalCnt", totalCnt);
 		model.addAttribute("pageNo", page);
+		model.addAttribute("page", pageVo);
+		model.addAttribute("loginName", loginName);
 		
 		return "board/boardList";
 	}
@@ -89,7 +103,6 @@ public class BoardController {
 	@ResponseBody
 	public String boardWriteAction(Locale locale,BoardVo boardVo) throws Exception{
 		
-		System.out.println("type : "+boardVo.getBoardType());
 		HashMap<String, String> result = new HashMap<String, String>();
 		CommonUtil commonUtil = new CommonUtil();
 		
@@ -141,44 +154,88 @@ public class BoardController {
 		int resultCnt = boardService.boardDelete(boardVo);
 		
 		result.put("success", (resultCnt > 0)?"Y":"N");
-		
 		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
 		
 		System.out.println("callbackMsg::"+callbackMsg);
 		
 		return callbackMsg;
+	}
+		@RequestMapping(value = "/board/boardJoin.do", method = RequestMethod.GET)
+	
+	public String boardJoin(Locale locale, Model model) throws Exception{
+		List<BoardVo> phoneList = new ArrayList<BoardVo>();
+		phoneList = boardService.selectPhoneList();
+		model.addAttribute("phoneList", phoneList);
+		return "/board/boardJoin";
+	}
 		
-		
+	@RequestMapping(value = "/board/boardLogin.do", method = RequestMethod.GET)
+	public String boardLogin(Locale locale) throws Exception{
+		return "/board/boardLogin";
 	}
 	
-	@RequestMapping(value = "/board/boardListSearch.do", method = RequestMethod.GET)
-	public String boardListSearch (Locale locale, Model model, PageVo pageVo) throws Exception{
-		System.out.println("legnth : "+pageVo.getBoardTypeArr().length);
-		for(String s : pageVo.getBoardTypeArr()){
-			System.out.println(s);
-		}
-		List<BoardVo> boardList = new ArrayList<BoardVo>();
-		List<BoardVo> menuList = new ArrayList<BoardVo>();
+	@RequestMapping(value = "/board/boardSelectIdList.do", method = RequestMethod.GET)
+	@ResponseBody
+	public JSONArray boardSelectIdList(Locale locale) throws Exception{
+		JSONArray jArr = boardService.selectUserList();
 		
-		int page = 1;
-		int totalCnt = 0;
+		System.out.println("JSONArray:"+jArr);
 		
-		
-		if(pageVo.getPageNo() == 0){
-			pageVo.setPageNo(page);
-		}
-		
-		boardList = boardService.selectBoardListSearch(pageVo);
-		totalCnt = boardService.selectBoardCnt();
-		menuList = boardService.selectMenuList();
-		
-		model.addAttribute("boardList", boardList);
-		model.addAttribute("menuList", menuList);
-		model.addAttribute("totalCnt", totalCnt);
-		model.addAttribute("pageNo", page);
-		
-		return "board/boardList";
+		return jArr;
 	}
+	
+	@RequestMapping(value = "/board/boardJoinAction.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String boardJoinAction(Locale locale,BoardVo boardVo) throws Exception{
+		
+		HashMap<String, String> result = new HashMap<String, String>();
+		CommonUtil commonUtil = new CommonUtil();
+		
+		int resultCnt = boardService.userInsert(boardVo);
+		
+		result.put("success", (resultCnt > 0)?"Y":"N");
+		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
+		
+		System.out.println("callbackMsg::"+callbackMsg);
+		
+		return callbackMsg;
+	}
+	
+	@RequestMapping(value = "/board/boardLoginAction.do", method = RequestMethod.POST)
+	@ResponseBody
+	public String boardLoginAction(Locale locale,BoardVo boardVo, HttpSession session) throws Exception{
+		
+		
+		System.out.println("sessionId"+(String)session.getAttribute("sessionId"));
+		HashMap<String, String> result = new HashMap<String, String>();
+		CommonUtil commonUtil = new CommonUtil();
+		
+		int resultCnt = boardService.loginiCheck(boardVo);
+		
+		if(resultCnt > 0) session.setAttribute("sessionId", boardVo.getUserId());
+		result.put("success", (resultCnt > 0)?"Y":"N");
+		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
+		
+		System.out.println("callbackMsg::"+callbackMsg);
+		
+		return callbackMsg;
+	}
+	
+	@RequestMapping(value = "/board/boardLogoutAction.do", method = RequestMethod.GET)
+	@ResponseBody
+	public String LogoutAction(Locale locale, HttpSession session) throws Exception{
+		
+		HashMap<String, String> result = new HashMap<String, String>();
+		CommonUtil commonUtil = new CommonUtil();
+		session.invalidate();
+		result.put("success", "Y");
+		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
+		
+		System.out.println("callbackMsg::"+callbackMsg);
+		
+		return callbackMsg;
+	}
+	
 	
 	
 }

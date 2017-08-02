@@ -7,8 +7,9 @@
     	<result property="boardNum" 	column="BOARD_NUM"/>
     	<result property="boardTitle" 	column="BOARD_TITLE"/>
     	<result property="boardComment" column="BOARD_COMMENT"/>
-    	<result property="codeName" column="CODE_NAME"/>
-    	<result property="codeId" column="CODE_ID"/>
+    	<result property="codeName" 	column="CODE_NAME"/>
+    	<result property="codeId" 		column="CODE_ID"/>
+    	<result property="userId" 		column="USER_ID"/>
     	 
     </resultMap>
     
@@ -29,21 +30,23 @@
 				,BOARD_COMMENT
 		      	,ROW_NUMBER() OVER(ORDER BY BOARD_NUM DESC) AS NUMROW
 		      	,COUNT(*) OVER() AS TOTAL_CNT
-		      	,CASE BOARD_TYPE 
-		      	WHEN 'a01' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a01' AND CODE_TYPE= 'menu')
-		      	WHEN 'a02' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a02' AND CODE_TYPE= 'menu')
-		      	WHEN 'a03' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a03' AND CODE_TYPE= 'menu')
-		      	WHEN 'a04' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a04' AND CODE_TYPE= 'menu')
-				END 
-				CODE_NAME
+		      	,CODE_NAME
 			FROM
-				BOARD	
+				BOARD
+			JOIN
+				COM_CODE
+			ON
+				BOARD_TYPE = CODE_ID
+			WHERE
+				CODE_TYPE = 'menu'
+			<if test="boardTypeArr!=null">
+				<foreach item="item" collection="boardTypeArr" separator="OR" open="AND">
+					BOARD_TYPE = #{item} 
+				</foreach>
+			</if>	
 		)
 		WHERE NUMROW BETWEEN (#{pageNo}-1)*10 + 1 AND (#{pageNo})*10
+		
     </select>
     
     <select id="boardTotal" parameterType="Integer" resultType="Integer">
@@ -80,7 +83,10 @@
         VALUES
         (#{boardType}
         ,(SELECT NVL(MAX(BOARD_NUM)+1,1)
-        FROM BOARD)
+        FROM BOARD
+        WHERE
+        BOARD_TYPE = #{boardType}
+        )
         ,#{boardTitle}
         ,#{boardComment}
         ,'SYSTEM'
@@ -114,47 +120,69 @@
       	CODE_TYPE = 'menu'
       </select>
       
+      <select id="phoneList" resultMap="boardVo">
+      	SELECT * FROM
+      	COM_CODE
+      	WHERE 
+      	CODE_TYPE = 'phone'
+      </select>
       
-      <select id="boardListSearch" parameterType="com.spring.board.vo.PageVo" resultMap="boardVo">
-        SELECT 
-		  BOARD_TYPE
-		  ,BOARD_NUM
-		  ,BOARD_TITLE
-		  ,BOARD_COMMENT
-		  ,TOTAL_CNT
-		  ,CODE_NAME
-		FROM 
-		(
-		  SELECT
-		      	BOARD_TYPE
-				,BOARD_NUM
-				,BOARD_TITLE
-				,BOARD_COMMENT
-		      	,ROW_NUMBER() OVER(ORDER BY BOARD_NUM DESC) AS NUMROW
-		      	,COUNT(*) OVER() AS TOTAL_CNT
-		      	,CASE BOARD_TYPE 
-		      	WHEN 'a01' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a01' AND CODE_TYPE= 'menu')
-		      	WHEN 'a02' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a02' AND CODE_TYPE= 'menu')
-		      	WHEN 'a03' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a03' AND CODE_TYPE= 'menu')
-		      	WHEN 'a04' THEN 
-		      	(SELECT CODE_NAME FROM COM_CODE WHERE CODE_ID = 'a04' AND CODE_TYPE= 'menu')
-				END 
-				CODE_NAME
-			FROM
-				BOARD	
-		)
-		
+      <select id="userList" resultMap="boardVo">
+      SELECT 
+      		USER_ID
+	  FROM
+			USER_INFO
+      </select>
+      <insert id = "userInput" parameterType="com.spring.board.vo.BoardVo">
+	  INSERT INTO
+		 USER_INFO
+		 (USER_ID
+		 , USER_PW
+		 , USER_NAME
+		 , USER_PHONE1
+		 , USER_PHONE2
+		 , USER_PHONE3
+		 , USER_ADDR1
+		 , USER_ADDR2
+		 , USER_COMPANY
+		 , CREATOR
+		 , CREATE_TIME
+		 , MODIFIER
+		 , MODIFIED_TIME
+		 )
+		 VALUES
+		 ( #{userId}
+		 , #{userPw}
+		 , #{userName}
+		 , #{userPhone1}
+		 , #{userPhone2}
+		 , #{userPhone3}
+		 , #{userAddr1}
+		 , #{userAddr2}
+		 , #{userCompany}
+		 , 'SYSTEM'
+		 , TO_CHAR(SYSDATE)
+		 , 'SYSTEM'
+		 , TO_CHAR(SYSDATE)
+		 )
+      
+      </insert>
+      
+      <select id="loginCheck" resultType="int" parameterType="com.spring.board.vo.BoardVo">
+      	SELECT
+			COUNT(*) loginCk
+		FROM
+			USER_INFO
 		WHERE
-		 
-		NUMROW BETWEEN (#{pageNo}-1)*10 + 1 AND (#{pageNo})*10
-		AND 
-		<foreach item="item" collection="boardTypeArr" separator="or">
-		BOARD_TYPE = #{item} 
-		</foreach>
-    </select>
-      
-    
+			USER_ID = #{userId}
+		AND
+			USER_PW = #{userPw}
+      </select>
+ 	  <select id='loginIdSelect' parameterType="String" resultType="String">
+ 	  	        SELECT 
+ 	  	        USER_NAME 
+ 	  	        FROM USER_INFO
+ 	  	        WHERE 
+ 	  	        USER_ID=#{sessionId}
+ 	  </select>   
 </mapper>

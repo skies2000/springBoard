@@ -35,19 +35,51 @@
 			}
 			if(falseFlg==ckList.length){alert('게시글 타입을 선택해주세요.');return;}
 			var frm = document.getElementById("bodyListFrm");
-			frm.action = '/board/boardListSearch.do';
+			frm.action = '/board/boardList.do';
 			frm.submit();
-			
-			
 		});
 		
+		$j("#logOutBtn").click(function(){
+			if(!confirm("로그아웃 하시겠습니까?")) return;
+			
+			$j.ajax({
+				url: "/board/boardLogoutAction.do",
+				dataType: "json",
+				type: "GET",
+				success: function(data, textStatus, jqXHR){
+					
+					alert("로그아웃 메시지"+data.success);
+					
+					location.href = "/board/boardList.do";
+				},
+				error: function (jqXHR, textStatus, errorThrown)
+				{
+					alert("실패");	
+				}
+			});	
+		});
 		
 	});
+	function goPage(page){
+		
+		var frm = document.getElementById("bodyListFrm");
+		var pageNo = frm.pageNo;
+		pageNo.value = page;
+		frm.action = "/board/boardList.do";
+		frm.submit();
+	}
 
 </script>
 <body>
 <table  align="center">
 	<tr>
+	<td>
+	${loginName}
+	<c:if test="${empty sessionId}">
+		<a href='/board/boardJoin.do'>Join</a>
+		<a href='/board/boardLogin.do'>Login</a>
+	</c:if>
+	</td>
 		<td align="right">
 			total : ${totalCnt}
 		</td>
@@ -84,6 +116,9 @@
 	</tr>
 	<tr>
 		<td align="right">
+			<c:if test="${!empty sessionId}">
+				<a href ="#" id="logOutBtn">로그아웃</a>
+			</c:if>
 			<a href ="/board/boardWrite.do">글쓰기</a>
 		</td>
 		
@@ -91,6 +126,7 @@
 	<tr>		
 		<td>
 		<form id = 'bodyListFrm'>
+			<input type="hidden" name="pageNo" value="0">
 			<label><input type='checkbox' id='allCheck'>전체</label>
 		<c:forEach var="obj" items="${menuList}">
 			<label><input type='checkbox' class='checkList' name='boardTypeArr' value='${obj.codeId}'>${obj.codeName}</label>
@@ -99,6 +135,26 @@
 		</form>
 		</td>
 	</tr>
-</table>	
+	<tr>
+	<td align="center">
+		
+		<c:if test="${page.startPage>1}">
+			<a href="#" onclick="goPage(1)">처음</a>
+			<a href="#" onclick="goPage(${page.startPage-1})">＜</a>
+		</c:if>
+		
+		<c:forEach var = 'p' begin="${page.startPage}" end="${page.endPage}">
+			<a href="#" onclick="goPage(${p})">${p}</a>
+		</c:forEach>
+		
+		<c:if test="${page.totPage > page.endPage}">
+			<a href="#" onclick="goPage(${page.endPage+1})">＞</a>
+			<a href="#" onclick="goPage(${page.totPage})">끝</a>
+		</c:if>
+		
+	</td>
+	</tr>
+</table>
+	
 </body>
 </html>
