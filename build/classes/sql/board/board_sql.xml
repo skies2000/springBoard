@@ -10,6 +10,7 @@
     	<result property="codeName" 	column="CODE_NAME"/>
     	<result property="codeId" 		column="CODE_ID"/>
     	<result property="userId" 		column="USER_ID"/>
+    	<result property="totalCnt" 	column="TOTAL_CNT"/>
     	 
     </resultMap>
     
@@ -45,7 +46,7 @@
 				</foreach>
 			</if>	
 		)
-		WHERE NUMROW BETWEEN (#{pageNo}-1)*10 + 1 AND (#{pageNo})*10
+			WHERE NUMROW BETWEEN (#{pageNo}-1)*10 + 1 AND (#{pageNo})*10
 		
     </select>
     
@@ -62,6 +63,7 @@
 			,BOARD_NUM
 			,BOARD_TITLE
 			,BOARD_COMMENT
+			,MODIFIER
 		FROM
 			BOARD
     	WHERE 	BOARD_TYPE = #{boardType}
@@ -89,9 +91,9 @@
         )
         ,#{boardTitle}
         ,#{boardComment}
-        ,'SYSTEM'
+        ,#{creator}
         ,TO_CHAR(SYSDATE)
-        ,'SYSTEM'
+        ,#{modifier}
         ,TO_CHAR(SYSDATE)
         )
     </select>
@@ -107,6 +109,7 @@
     SET
     BOARD_TITLE = #{boardTitle},
      BOARD_COMMENT=#{boardComment},
+     MODIFIER = #{modifier},
      MODIFIED_TIME=TO_CHAR(SYSDATE) 
      WHERE BOARD_NUM = #{boardNum}
      AND BOARD_TYPE = #{boardType}
@@ -168,16 +171,25 @@
       
       </insert>
       
-      <select id="loginCheck" resultType="int" parameterType="com.spring.board.vo.BoardVo">
+      <select id="loginIdCheck" resultType="int" parameterType="com.spring.board.vo.BoardVo">
       	SELECT
 			COUNT(*) loginCk
 		FROM
 			USER_INFO
 		WHERE
 			USER_ID = #{userId}
-		AND
-			USER_PW = #{userPw}
       </select>
+      <select id="loginPwCheck" resultType="int" parameterType="com.spring.board.vo.BoardVo">
+      	SELECT
+			COUNT(*) loginCk
+		FROM
+			USER_INFO
+		WHERE
+			USER_PW = #{userPw}
+		AND
+			USER_ID = #{userId}
+      </select>
+      
  	  <select id='loginIdSelect' parameterType="String" resultType="String">
  	  	        SELECT 
  	  	        USER_NAME 

@@ -11,6 +11,21 @@
 	$j(document).ready(function(){
 		
 		$j("#loginBtn").click(function(){
+			var loginId = $j("#bodyLogin input[name='userId']");
+			var loginPw = $j("#bodyLogin input[name='userPw']");
+			
+			if($j.trim(loginId.val())==""){
+				alert("아이디를 입력해 주세요.");
+				loginId.focus();
+				return;
+			}
+			
+			if($j.trim(loginPw.val())==""){
+				alert("비밀번호를 입력해 주세요.")
+				loginPw.focus();
+				return;
+			}
+			
 			var frm$ = $j("#bodyLogin :input");
 			var param = frm$.serialize(); 
 			$j.ajax({
@@ -20,8 +35,16 @@
 				type: "POST",
 				success: function(data, textStatus, jqXHR){
 					
-					alert("로그인 메시지:"+data.success);
-					if(data.success=='N') return;
+					if(data[0].idSucess==0){
+						alert("존재하지 않는 아이디 입니다.");
+						loginId.focus();
+						return;
+					}
+					if(data[0].pwSucess==0){
+						alert("비밀번호가 일치하지 않습니다.");
+						loginPw.focus();
+						return;
+					}
 					
 					location.href = "/board/boardList.do";
 				},
@@ -45,7 +68,7 @@
 				id
 				</td>
 				<td width="200">
-				<input type="text" name="userId">
+				<input type="text" name="userId" placeholder="아이디를 입력해 주세요">
 				</td>
 			</tr>
 			
@@ -54,7 +77,7 @@
 				pw
 				</td>
 				<td>
-				<input type="password" name="userPw">
+				<input type="password" name="userPw" placeholder="비밀번호를 입력해 주세요">
 				</td>
 			</tr>
 			</table>

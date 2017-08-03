@@ -28,6 +28,7 @@ public class BoardVo {
 	
 	
 	
+	
 	public String getCodeId() {
 		return codeId;
 	}

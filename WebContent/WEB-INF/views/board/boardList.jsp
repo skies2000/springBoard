@@ -68,13 +68,30 @@
 		frm.action = "/board/boardList.do";
 		frm.submit();
 	}
+	
+	function menuListCheck(data){
+		var jsonData = JSON.parse(data);
+		var checkCnt = 0;
+		var checkList = $j('#bodyListFrm .checkList');
+		for(var i = 0; i<jsonData.length; i++){
+			for(var j = 0; j<checkList.length; j++){
+				if(jsonData[i].type == checkList.eq(j).val()){
+					checkList.eq(j).attr('checked',true);
+					checkCnt++;
+				}
+			}
+			
+			if(checkCnt == checkList.length)
+				$j('#bodyListFrm #allCheck').attr('checked',true);
+		}
+	}
 
 </script>
 <body>
 <table  align="center">
 	<tr>
 	<td>
-	${loginName}
+	${sessionId.codeName}
 	<c:if test="${empty sessionId}">
 		<a href='/board/boardJoin.do'>Join</a>
 		<a href='/board/boardLogin.do'>Login</a>
@@ -118,8 +135,8 @@
 		<td align="right">
 			<c:if test="${!empty sessionId}">
 				<a href ="#" id="logOutBtn">로그아웃</a>
+				<a href ="/board/boardWrite.do">글쓰기</a>
 			</c:if>
-			<a href ="/board/boardWrite.do">글쓰기</a>
 		</td>
 		
 	</tr>
@@ -132,6 +149,8 @@
 			<label><input type='checkbox' class='checkList' name='boardTypeArr' value='${obj.codeId}'>${obj.codeName}</label>
 		</c:forEach>
 			<input type='button' value='조회' id = 'boardSearchBtn'>
+			
+			<script>menuListCheck('${boardTypeCheck}');</script>
 		</form>
 		</td>
 	</tr>

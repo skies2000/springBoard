@@ -71,10 +71,14 @@
 						</td>
 					</tr>
 					<tr>
-						<td align="center">W
+						<td align="center">
 						Writer
 						</td>
 						<td>
+						<c:if test="${!empty sessionId}">
+							${sessionId.codeName}
+							<input type="hidden" name="modifier" value="${sessionId.codeName}">
+						</c:if>
 						</td>
 					</tr>
 				</table>

@@ -84,6 +84,11 @@
 						Writer
 						</td>
 						<td>
+						<c:if test="${!empty sessionId}">
+							${sessionId.codeName}
+							<input type="hidden" name="creator" value="${sessionId.codeName}">
+							<input type="hidden" name="modifier" value="${sessionId.codeName}">
+						</c:if>
 						</td>
 					</tr>
 				</table>

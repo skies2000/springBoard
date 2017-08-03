@@ -20,6 +20,7 @@
 		var userAddr1Reg = /^\d{3}-\d{3}$/;
 		var userAddr2Reg = /^$/;
 		var userCompanyReg = /^$/;
+		var userAddr1AppendReg = /^\d{3}$/;
 		
 		$j("#bodyJoin input[name='userPwCheck']").keyup(function(){
 			var userPw = $j("#bodyJoin input[name='userPw']");
@@ -36,6 +37,12 @@
 				pwdCheckFlag = false;
 			}
 			
+		});
+		
+		$j("#bodyJoin input[name='userAddr1']").keyup(function(){
+			if(userAddr1AppendReg.test($j(this).val())){
+				$j(this).val($j(this).val()+"-");
+			}
 		});
 		
 			$j("#bodyJoin input[name='userPw']").on("keyup change",function(){
@@ -64,6 +71,18 @@
 			idCheckFlag = false;
 		});
 		
+		$j("#bodyJoin input[name='userAddr1']").on("keyup change",function(){
+			var userA1M = $j('#userAddr1kMsg')
+			
+			if(userAddr1Reg.test($j(this).val())){
+				userA1M.attr('color','blue');
+				userA1M.text('정상입력')
+			}else{
+				userA1M.attr('color','red');
+				userA1M.text('xxx-xxx 형식필요')
+			}
+			
+		});
 		
 		
 		$j('#joinSubmitBtn').click(function(){
@@ -172,6 +191,7 @@
 				},
 				error: function (jqXHR, textStatus, errorThrown)
 				{
+					
 					alert("실패");	
 				}
 			});
@@ -247,6 +267,7 @@
 						</td>
 						<td>
 						<input type="text" name="userAddr1" size="14">
+						<font id = "userAddr1kMsg" size="2"></font>
 						</td>
 					</tr>
 					<tr>

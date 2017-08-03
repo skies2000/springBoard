@@ -83,10 +83,16 @@ public class BoardDaoImpl implements BoardDao{
 		return sqlSession.insert("board.userInput",boardVo);
 	}
 	@Override
-	public int loginCheck(BoardVo boardVo) throws Exception {
+	public int loginIdCheck(BoardVo boardVo) throws Exception {
 		// TODO Auto-generated method stub
-		return sqlSession.selectOne("board.loginCheck",boardVo);
+		return sqlSession.selectOne("board.loginIdCheck",boardVo);
 	}
+	@Override
+	public int loginPwCheck(BoardVo boardVo) throws Exception {
+		// TODO Auto-generated method stub
+		return sqlSession.selectOne("board.loginPwCheck",boardVo);
+	}
+	
 	
 	@Override
 	public String loginIdSelect(String sessionId) throws Exception {

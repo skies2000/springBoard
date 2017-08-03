@@ -30,6 +30,7 @@ import com.spring.board.vo.BoardVo;
 import com.spring.board.vo.PageVo;
 import com.spring.common.CommonUtil;
 
+import net.sf.json.JSON;
 import net.sf.json.JSONObject;
 
 @Controller
@@ -45,31 +46,36 @@ public class BoardController {
 		
 		List<BoardVo> boardList = new ArrayList<BoardVo>();
 		List<BoardVo> menuList = new ArrayList<BoardVo>();
-		String loginName = "";
-		
+		JSONArray jArr = new JSONArray();
+		String[] boardTypeArr = pageVo.getBoardTypeArr();
 		int page = 1;
 		int totalCnt = 0;
 		
+		if(boardTypeArr!=null){
+			for(String str : boardTypeArr){
+				JSONObject obj = new JSONObject();
+				obj.put("type", str);
+				jArr.add(obj);
+			}
+		}
 		if(pageVo.getPageNo() == 0){
 			pageVo.setPageNo(page);
 		}
-		
-		System.out.println("loginId : "+(String)session.getAttribute("sessionId"));
 		boardList = boardService.SelectBoardList(pageVo);
-		totalCnt = boardService.selectBoardCnt();
+
+		if(boardList.size()>0 && boardList!=null){
+			 totalCnt = boardList.get(0).getTotalCnt();
+		}
+		
 		menuList = boardService.selectMenuList();
 		pageVo = boardService.pageCompute(pageVo.getPageNo(), totalCnt);
-		if((String)session.getAttribute("sessionId")!=null)
-		{
-			loginName = boardService.loginIdSelect((String)session.getAttribute("sessionId"));
-		}
 		
 		model.addAttribute("boardList", boardList);
 		model.addAttribute("menuList", menuList);
 		model.addAttribute("totalCnt", totalCnt);
 		model.addAttribute("pageNo", page);
 		model.addAttribute("page", pageVo);
-		model.addAttribute("loginName", loginName);
+		model.addAttribute("boardTypeCheck", jArr);
 		
 		return "board/boardList";
 	}
@@ -203,22 +209,16 @@ public class BoardController {
 	
 	@RequestMapping(value = "/board/boardLoginAction.do", method = RequestMethod.POST)
 	@ResponseBody
-	public String boardLoginAction(Locale locale,BoardVo boardVo, HttpSession session) throws Exception{
+	public JSONArray boardLoginAction(Locale locale,BoardVo boardVo, HttpSession session) throws Exception{
 		
 		
-		System.out.println("sessionId"+(String)session.getAttribute("sessionId"));
-		HashMap<String, String> result = new HashMap<String, String>();
-		CommonUtil commonUtil = new CommonUtil();
 		
-		int resultCnt = boardService.loginiCheck(boardVo);
+		JSONArray resultJson = boardService.loginCheck(boardVo, session);
 		
-		if(resultCnt > 0) session.setAttribute("sessionId", boardVo.getUserId());
-		result.put("success", (resultCnt > 0)?"Y":"N");
-		String callbackMsg = commonUtil.getJsonCallBackString(" ",result);
 		
-		System.out.println("callbackMsg::"+callbackMsg);
+		System.out.println("resultJson :"+resultJson );
 		
-		return callbackMsg;
+		return resultJson;
 	}
 	
 	@RequestMapping(value = "/board/boardLogoutAction.do", method = RequestMethod.GET)

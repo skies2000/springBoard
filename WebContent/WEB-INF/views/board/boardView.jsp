@@ -70,6 +70,7 @@ $j(document).ready(function(){
 					Writer
 					</td>
 					<td>
+					${board.modifier}
 					</td>
 				</tr>
 			</table>
@@ -77,8 +78,10 @@ $j(document).ready(function(){
 	</tr>
 	<tr>
 		<td align="right">
-			<a href="/board/${boardType}/${boardNum}/boardUpdate.do" >Update</a>
-			<a href="#" id = "deleteBtn">Delete</a>
+			<c:if test="${!empty sessionId}">
+				<a href="/board/${boardType}/${boardNum}/boardUpdate.do" >Update</a>
+				<a href="#" id = "deleteBtn">Delete</a>
+			</c:if>
 			<a href="/board/boardList.do">List</a>
 		</td>
 		<td align="right">

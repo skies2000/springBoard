@@ -2,6 +2,8 @@ package com.spring.board.service.impl;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.apache.ibatis.session.SqlSession;
 import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,9 +96,22 @@ public class boardServiceImpl implements boardService{
 	}
 	
 	@Override
-	public int loginiCheck(BoardVo boardVo) throws Exception {
+	public JSONArray loginCheck(BoardVo boardVo, HttpSession session) throws Exception {
+		JSONArray jArr = new JSONArray();
+		JSONObject jObj = new JSONObject();
+		int idCk = boardDao.loginIdCheck(boardVo);
+		int pwCk = boardDao.loginPwCheck(boardVo);
+		
+		if(idCk == 1 && pwCk == 1){
+			boardVo.setCodeName(loginIdSelect(boardVo.getUserId()));
+			session.setAttribute("sessionId", boardVo);
+		}
+		
+		jObj.put("idSucess", idCk);
+		jObj.put("pwSucess", pwCk);
+		jArr.add(jObj);
 		// TODO Auto-generated method stub
-		return boardDao.loginCheck(boardVo);
+		return jArr;
 	}
 	
 	@Override

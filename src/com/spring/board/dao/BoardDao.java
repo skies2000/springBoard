@@ -29,7 +29,9 @@ public interface BoardDao {
 	
 	public int userInsert(BoardVo boardVo) throws Exception; 
 	
-	public int loginCheck(BoardVo boardVo) throws Exception;
+	public int loginIdCheck(BoardVo boardVo) throws Exception;
+	
+	public int loginPwCheck(BoardVo boardVo) throws Exception;
 	
 	public String loginIdSelect(String sessionId) throws Exception;
 	

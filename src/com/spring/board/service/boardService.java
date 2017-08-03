@@ -2,6 +2,8 @@ package com.spring.board.service;
 
 import java.util.List;
 
+import javax.servlet.http.HttpSession;
+
 import org.json.simple.JSONArray;
 
 import com.spring.board.vo.BoardVo;
@@ -31,7 +33,7 @@ public interface boardService {
 	
 	public int userInsert(BoardVo boardVo) throws Exception;
 	
-	public int loginiCheck(BoardVo boardVo) throws Exception;
+	public JSONArray loginCheck(BoardVo boardVo, HttpSession session) throws Exception;
 	
 	public PageVo pageCompute(int nowPage,int totalCnt) throws Exception;
 	
